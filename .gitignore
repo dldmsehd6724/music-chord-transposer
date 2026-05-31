@@ -6,3 +6,6 @@ out/
 dist/
 .vercel
 *.log
+
+*.png
+*.log
