@@ -40,12 +40,12 @@ function shiftChord(chord: string, steps: number, useFlat: boolean): string {
   return newRoot + quality + newSlash;
 }
 
-// 코드만 있는 줄인지 판별 (한글 없고 모든 토큰이 코드 형식)
+// 코드만 있는 줄인지 판별 (한글 없고, 쉼표·공백으로 구분된 모든 토큰이 코드 형식)
 function isChordOnlyLine(line: string): boolean {
   const trimmed = line.trim();
   if (!trimmed) return false;
-  if (/[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(trimmed)) return false; // 한글 포함 시 제외
-  const tokens = trimmed.split(/\s+/);
+  if (/[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(trimmed)) return false;
+  const tokens = trimmed.split(/[\s,]+/).filter(Boolean);
   return tokens.length > 0 && tokens.every((t) => CHORD_RE.test(t));
 }
 
@@ -79,11 +79,11 @@ export function transposeText(
           (_, chord) => '[' + shiftChord(chord.trim(), steps, useFlat) + ']'
         );
       }
-      // ② 인라인 표기: 코드만 있는 줄
+      // ② 인라인 표기: 쉼표·공백으로 구분된 코드만 있는 줄
       if (isChordOnlyLine(line)) {
-        const parts = line.split(/(\s+)/); // 공백 보존
+        const parts = line.split(/([\s,]+)/); // 구분자(공백·쉼표) 보존
         return parts
-          .map((part) => (/^\s+$/.test(part) ? part : shiftChord(part, steps, useFlat)))
+          .map((part) => (/^[\s,]+$/.test(part) || part === '' ? part : shiftChord(part, steps, useFlat)))
           .join('');
       }
       return line;
