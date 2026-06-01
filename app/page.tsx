@@ -14,12 +14,21 @@ const translations = {
     subtitle: "코드체인지",
     desc: "악보의 코드를 원하는 키로 즉시 전조합니다",
     langToggle: "English",
+    soundOn: "소리 켜짐",
+    soundOff: "소리 꺼짐",
     inputSection: "악보 입력",
     keySection: "키 선택",
     originalKey: "원본 키",
     targetKey: "목표 키",
     sheetLabel: "악보 텍스트",
     placeholder: "코드 악보를 입력하세요\n예: [G]여기 서서 [Em]바라보면",
+    guideTitle: "사용 방법",
+    guideS1Label: "① 악보 입력",
+    guideS1Text: "대괄호 안에 코드를 넣어 입력하세요\n예) [G]여기 서서 [Em]바라보면\n예) [C]온 세상이 [D]아름다워",
+    guideS2Label: "② 키 선택",
+    guideS2Text: "원본 키(현재 악보 키)와\n목표 키(바꿀 키)를 선택하세요",
+    guideS3Label: "③ 전조하기",
+    guideS3Text: "'코드 전조하기' 버튼을 누르면\n변환된 악보가 바로 나와요",
     transpose: "코드 전조하기",
     transposing: "전조 중...",
     resultSection: "전조 결과",
@@ -36,12 +45,21 @@ const translations = {
     subtitle: "Chord Change",
     desc: "Instantly transpose your chord sheet to any key",
     langToggle: "한국어",
+    soundOn: "Sound on",
+    soundOff: "Sound off",
     inputSection: "Sheet Music",
     keySection: "Key Selection",
     originalKey: "Original Key",
     targetKey: "Target Key",
     sheetLabel: "Chord Sheet",
     placeholder: "Enter your chord sheet here\ne.g. [G]Standing here [Em]looking out",
+    guideTitle: "How to Use",
+    guideS1Label: "① Enter chords",
+    guideS1Text: "Put each chord in square brackets\ne.g. [G]Standing here [Em]looking out\ne.g. [C]All the world [D]is beautiful",
+    guideS2Label: "② Select keys",
+    guideS2Text: "Choose the Original Key (current key)\nand the Target Key (key to change to)",
+    guideS3Label: "③ Transpose",
+    guideS3Text: "Press 'Transpose Chords' and your\ntransposed sheet appears instantly",
     transpose: "Transpose Chords",
     transposing: "Transposing...",
     resultSection: "Transposed Result",
@@ -55,11 +73,40 @@ const translations = {
 } as const;
 
 type Lang = keyof typeof translations;
-
 // ────────────────────────────────────────────────────────────────────────────
+
+// Web Audio API로 맑은 차임 소리 재생 (C-E-G 화음)
+function playChime() {
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+
+    const tone = (freq: number, vol: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.3);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 1.3);
+    };
+
+    tone(1046.5, 0.25); // C6
+    tone(1318.5, 0.15); // E6
+    tone(1568.0, 0.10); // G6
+  } catch (e) {
+    // Web Audio API 미지원 환경에서 무시
+  }
+}
 
 export default function Home() {
   const [lang, setLang] = useState<Lang>("ko");
+  const [isMuted, setIsMuted] = useState(false);
   const [chordText, setChordText] = useState("");
   const [sourceKey, setSourceKey] = useState("G");
   const [targetKey, setTargetKey] = useState("C");
@@ -69,6 +116,7 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
 
   const tx = translations[lang];
+  const showGuide = chordText.trim() === "";
 
   const handleTranspose = async () => {
     if (!chordText.trim()) return;
@@ -82,8 +130,12 @@ export default function Home() {
         body: JSON.stringify({ chordText, sourceKey, targetKey }),
       });
       const data = await res.json();
-      if (data.error) setError(data.error);
-      else setResult(data.result);
+      if (data.error) {
+        setError(data.error);
+      } else {
+        setResult(data.result);
+        if (!isMuted) playChime();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -106,8 +158,17 @@ export default function Home() {
 
       <div className="max-w-5xl mx-auto relative z-10 px-4 sm:px-6 py-8 sm:py-12 lg:py-14">
 
-        {/* 언어 전환 버튼 */}
-        <div className="flex justify-end mb-4 sm:mb-6">
+        {/* 상단 버튼 영역 */}
+        <div className="flex justify-end gap-2 mb-4 sm:mb-6">
+          {/* 음소거 토글 */}
+          <button
+            onClick={() => setIsMuted(!isMuted)}
+            title={isMuted ? tx.soundOn : tx.soundOff}
+            className="inline-flex items-center px-3 py-2.5 rounded-xl bg-white border-2 border-orange-500 text-stone-900 text-base font-bold hover:bg-orange-50 transition-all duration-200 shadow-sm active:scale-95 touch-manipulation"
+          >
+            {isMuted ? "🔇" : "🔊"}
+          </button>
+          {/* 언어 전환 */}
           <button
             onClick={() => setLang(lang === "ko" ? "en" : "ko")}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-orange-500 text-stone-900 text-sm font-bold hover:bg-orange-50 hover:border-orange-600 transition-all duration-200 shadow-sm active:scale-95 touch-manipulation"
@@ -119,17 +180,15 @@ export default function Home() {
 
         {/* 헤더 */}
         <div className="text-center mb-10 sm:mb-14">
-          <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white border-2 border-orange-200 mb-5 sm:mb-6 shadow-lg shadow-orange-100">
+          <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white border-2 border-orange-400 mb-5 sm:mb-6 shadow-lg shadow-orange-200">
             <span className="text-4xl sm:text-5xl">🎸</span>
           </div>
-
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight warm-gradient-text leading-none mb-2">
             {tx.appName}
           </h1>
           <p className="text-xl sm:text-2xl font-semibold text-orange-600 tracking-widest mb-5">
             {tx.appNameSub}
           </p>
-
           <p className="text-lg sm:text-xl font-bold text-stone-700 mb-1">{tx.subtitle}</p>
           <p className="text-sm sm:text-base text-stone-600">{tx.desc}</p>
         </div>
@@ -163,7 +222,7 @@ export default function Home() {
                 </div>
 
                 <div className="pt-6 flex-shrink-0">
-                  <span className="text-orange-400 text-3xl font-bold">→</span>
+                  <span className="text-orange-500 text-3xl font-bold">→</span>
                 </div>
 
                 <div className="flex-1">
@@ -182,9 +241,9 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 텍스트에어리어 */}
+            {/* 악보 텍스트에어리어 */}
             <div>
-              <label htmlFor="chordText" className="block text-base font-bold text-stone-700 mb-3">
+              <label htmlFor="chordText" className="block text-base font-bold text-stone-800 mb-3">
                 {tx.sheetLabel}
               </label>
               <textarea
@@ -195,6 +254,28 @@ export default function Home() {
                 className="w-full bg-white border-2 border-stone-300 rounded-2xl px-5 py-4 font-mono text-base sm:text-lg text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none leading-loose placeholder:text-stone-500"
                 placeholder={tx.placeholder}
               />
+            </div>
+
+            {/* 사용 안내 — 입력값이 없을 때만 표시, 부드럽게 사라짐 */}
+            <div
+              className="overflow-hidden transition-all duration-500 ease-in-out"
+              style={{ maxHeight: showGuide ? "500px" : "0px", opacity: showGuide ? 1 : 0 }}
+            >
+              <div className="rounded-2xl bg-amber-50 border-2 border-amber-300 p-4 sm:p-5">
+                <p className="text-sm font-bold text-amber-800 mb-3">📌 {tx.guideTitle}</p>
+                <div className="space-y-3">
+                  {[
+                    { label: tx.guideS1Label, text: tx.guideS1Text },
+                    { label: tx.guideS2Label, text: tx.guideS2Text },
+                    { label: tx.guideS3Label, text: tx.guideS3Text },
+                  ].map(({ label, text }) => (
+                    <div key={label}>
+                      <p className="text-sm font-bold text-stone-800 mb-0.5">{label}</p>
+                      <p className="text-sm whitespace-pre-line leading-relaxed text-stone-600">{text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <button
@@ -245,7 +326,7 @@ export default function Home() {
                     className={`inline-flex items-center gap-2 text-base px-4 py-3 rounded-xl font-bold transition-all duration-200 touch-manipulation border-2 flex-shrink-0 active:scale-95 ${
                       copied
                         ? "bg-emerald-50 text-emerald-700 border-emerald-300"
-                        : "bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100"
+                        : "bg-orange-50 text-orange-700 border-orange-300 hover:bg-orange-100"
                     }`}
                   >
                     {copied
@@ -254,7 +335,8 @@ export default function Home() {
                     }
                   </button>
                 </div>
-                <pre className="font-mono text-base sm:text-lg text-stone-900 whitespace-pre-wrap bg-orange-50 border-2 border-orange-300 rounded-2xl p-5 sm:p-6 overflow-auto max-h-80 sm:max-h-96 leading-loose">
+                {/* 결과 텍스트 — 크게 */}
+                <pre className="font-mono text-xl sm:text-2xl text-stone-900 whitespace-pre-wrap bg-orange-50 border-2 border-orange-300 rounded-2xl p-5 sm:p-6 overflow-auto max-h-96 sm:max-h-[30rem] leading-loose">
                   {result}
                 </pre>
               </div>
