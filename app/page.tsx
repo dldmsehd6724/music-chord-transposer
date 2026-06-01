@@ -30,7 +30,7 @@ const translations = {
     copy: "복사",
     copied: "복사됨",
     emptyLine1: "왼쪽에 악보를 입력하고",
-    emptyLine2: "키를 선택한 후 전조하기를 눌러보세요",
+    emptyLine2: "키를 선택한 후 코드 바꾸기를 눌러보세요",
     emptyMobile: "키를 선택한 후 위 버튼을 눌러보세요",
     footer: "순수 코드 전조 엔진 · Next.js",
   },
@@ -56,7 +56,7 @@ const translations = {
     copy: "Copy",
     copied: "Copied!",
     emptyLine1: "Enter your chord sheet on the left,",
-    emptyLine2: "select a key and press Transpose.",
+    emptyLine2: "select a key and press Change Chords.",
     emptyMobile: "Select a key and tap the button above.",
     footer: "Pure Chord Transposition Engine · Next.js",
   },
@@ -154,14 +154,14 @@ export default function Home() {
           <button
             onClick={() => setIsMuted(!isMuted)}
             title={isMuted ? tx.soundOn : tx.soundOff}
-            className="inline-flex items-center px-3 py-2.5 rounded-xl bg-white border-2 border-blue-400 text-stone-900 text-base font-bold hover:bg-orange-50 transition-all duration-200 shadow-sm active:scale-95 touch-manipulation"
+            className="inline-flex items-center px-3 py-2.5 rounded-xl bg-white border-2 border-blue-500 text-stone-900 text-base font-bold hover:bg-orange-50 transition-all duration-200 shadow-sm active:scale-95 touch-manipulation"
           >
             {isMuted ? "🔇" : "🔊"}
           </button>
           {/* 언어 전환 */}
           <button
             onClick={() => setLang(lang === "ko" ? "en" : "ko")}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-blue-400 text-stone-900 text-sm font-bold hover:bg-orange-50 hover:border-blue-500 transition-all duration-200 shadow-sm active:scale-95 touch-manipulation"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-blue-500 text-stone-900 text-sm font-bold hover:bg-orange-50 hover:border-blue-500 transition-all duration-200 shadow-sm active:scale-95 touch-manipulation"
           >
             <span>🌐</span>
             {tx.langToggle}
@@ -170,7 +170,7 @@ export default function Home() {
 
         {/* 헤더 */}
         <div className="text-center mb-10 sm:mb-14">
-          <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white border-2 border-blue-400 mb-5 sm:mb-6 shadow-lg shadow-orange-200">
+          <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white border-2 border-blue-500 mb-5 sm:mb-6 shadow-lg shadow-orange-200">
             <span className="text-4xl sm:text-5xl">🎸</span>
           </div>
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight warm-gradient-text leading-none mb-2">
@@ -205,7 +205,7 @@ export default function Home() {
                     id="sourceKey"
                     value={sourceKey}
                     onChange={(e) => setSourceKey(e.target.value)}
-                    className="w-full bg-white border-2 border-blue-400 rounded-2xl px-4 py-4 text-lg sm:text-xl text-stone-900 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer touch-manipulation"
+                    className="w-full bg-white border-2 border-blue-500 rounded-2xl px-4 py-4 text-lg sm:text-xl text-stone-900 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer touch-manipulation"
                   >
                     {ALL_KEYS.map((k) => <option key={k} value={k}>{k}</option>)}
                   </select>
@@ -223,7 +223,7 @@ export default function Home() {
                     id="targetKey"
                     value={targetKey}
                     onChange={(e) => setTargetKey(e.target.value)}
-                    className="w-full bg-white border-2 border-blue-400 rounded-2xl px-4 py-4 text-lg sm:text-xl text-stone-900 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer touch-manipulation"
+                    className="w-full bg-white border-2 border-blue-500 rounded-2xl px-4 py-4 text-lg sm:text-xl text-stone-900 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer touch-manipulation"
                   >
                     {ALL_KEYS.map((k) => <option key={k} value={k}>{k}</option>)}
                   </select>
@@ -241,7 +241,7 @@ export default function Home() {
                 value={chordText}
                 onChange={(e) => setChordText(e.target.value)}
                 rows={9}
-                className="w-full bg-white border-2 border-blue-300 rounded-2xl px-5 py-4 font-mono text-base sm:text-lg text-stone-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none leading-loose placeholder:text-stone-500"
+                className="w-full bg-white border-2 border-blue-400 rounded-2xl px-5 py-4 font-mono text-base sm:text-lg text-stone-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none leading-loose placeholder:text-stone-500"
                 placeholder={tx.placeholder}
               />
             </div>
@@ -252,10 +252,10 @@ export default function Home() {
               style={{ maxHeight: showGuide ? "500px" : "0px", opacity: showGuide ? 1 : 0 }}
             >
               <div className="rounded-2xl bg-amber-50 border-2 border-amber-300 p-4 sm:p-5 space-y-2">
-                <p className="text-sm leading-relaxed text-stone-700">
+                <p className="text-sm leading-relaxed text-stone-900">
                   <span className="mr-1">📌</span>{tx.guideText}
                 </p>
-                <p className="text-sm leading-relaxed text-stone-700">
+                <p className="text-sm leading-relaxed text-stone-900">
                   <span className="mr-1">📌</span>{tx.guideText2}
                 </p>
               </div>
@@ -309,7 +309,7 @@ export default function Home() {
                     className={`inline-flex items-center gap-2 text-base px-4 py-3 rounded-xl font-bold transition-all duration-200 touch-manipulation border-2 flex-shrink-0 active:scale-95 ${
                       copied
                         ? "bg-emerald-50 text-emerald-700 border-emerald-300"
-                        : "bg-orange-50 text-orange-700 border-blue-300 hover:bg-orange-100"
+                        : "bg-orange-50 text-orange-700 border-blue-400 hover:bg-orange-100"
                     }`}
                   >
                     {copied
@@ -319,7 +319,7 @@ export default function Home() {
                   </button>
                 </div>
                 {/* 결과 텍스트 — 크게 */}
-                <pre className="font-mono text-xl sm:text-2xl text-stone-900 whitespace-pre-wrap bg-orange-50 border-2 border-blue-300 rounded-2xl p-5 sm:p-6 overflow-auto max-h-96 sm:max-h-[30rem] leading-loose">
+                <pre className="font-mono text-xl sm:text-2xl text-stone-900 whitespace-pre-wrap bg-orange-50 border-2 border-blue-400 rounded-2xl p-5 sm:p-6 overflow-auto max-h-96 sm:max-h-[30rem] leading-loose">
                   {result}
                 </pre>
               </div>
