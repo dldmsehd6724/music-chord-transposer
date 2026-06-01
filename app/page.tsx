@@ -98,7 +98,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#fff8f0] relative overflow-hidden pt-safe pb-safe">
+    <main className="min-h-screen bg-[#fddcb0] relative overflow-hidden pt-safe pb-safe">
       {/* 배경 장식 */}
       <div className="pointer-events-none absolute -top-32 -left-32 w-80 h-80 sm:w-[28rem] sm:h-[28rem] rounded-full bg-orange-200/40 blur-3xl" />
       <div className="pointer-events-none absolute top-1/3 -right-24 w-72 h-72 sm:w-96 sm:h-96 rounded-full bg-amber-200/35 blur-3xl" />
@@ -156,7 +156,7 @@ export default function Home() {
                     id="sourceKey"
                     value={sourceKey}
                     onChange={(e) => setSourceKey(e.target.value)}
-                    className="w-full bg-orange-50 border-2 border-orange-200 rounded-2xl px-4 py-4 text-lg sm:text-xl text-stone-800 font-bold focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 cursor-pointer touch-manipulation"
+                    className="w-full bg-white border-2 border-orange-400 rounded-2xl px-4 py-4 text-lg sm:text-xl text-stone-900 font-bold focus:outline-none focus:ring-2 focus:ring-orange-600 focus:border-orange-600 cursor-pointer touch-manipulation"
                   >
                     {ALL_KEYS.map((k) => <option key={k} value={k}>{k}</option>)}
                   </select>
@@ -174,7 +174,7 @@ export default function Home() {
                     id="targetKey"
                     value={targetKey}
                     onChange={(e) => setTargetKey(e.target.value)}
-                    className="w-full bg-orange-50 border-2 border-orange-200 rounded-2xl px-4 py-4 text-lg sm:text-xl text-stone-800 font-bold focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 cursor-pointer touch-manipulation"
+                    className="w-full bg-white border-2 border-orange-400 rounded-2xl px-4 py-4 text-lg sm:text-xl text-stone-900 font-bold focus:outline-none focus:ring-2 focus:ring-orange-600 focus:border-orange-600 cursor-pointer touch-manipulation"
                   >
                     {ALL_KEYS.map((k) => <option key={k} value={k}>{k}</option>)}
                   </select>
@@ -192,7 +192,7 @@ export default function Home() {
                 value={chordText}
                 onChange={(e) => setChordText(e.target.value)}
                 rows={9}
-                className="w-full bg-stone-50 border-2 border-stone-200 rounded-2xl px-5 py-4 font-mono text-base sm:text-lg text-stone-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 resize-none leading-loose placeholder:text-stone-400"
+                className="w-full bg-white border-2 border-stone-300 rounded-2xl px-5 py-4 font-mono text-base sm:text-lg text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none leading-loose placeholder:text-stone-500"
                 placeholder={tx.placeholder}
               />
             </div>
@@ -254,7 +254,7 @@ export default function Home() {
                     }
                   </button>
                 </div>
-                <pre className="font-mono text-base sm:text-lg text-stone-800 whitespace-pre-wrap bg-stone-50 border-2 border-stone-200 rounded-2xl p-5 sm:p-6 overflow-auto max-h-80 sm:max-h-96 leading-loose">
+                <pre className="font-mono text-base sm:text-lg text-stone-900 whitespace-pre-wrap bg-orange-50 border-2 border-orange-300 rounded-2xl p-5 sm:p-6 overflow-auto max-h-80 sm:max-h-96 leading-loose">
                   {result}
                 </pre>
               </div>

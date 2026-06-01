@@ -6,7 +6,7 @@
 
 html, body {
   font-family: 'Noto Sans KR', 'Inter', -apple-system, 'Malgun Gothic', sans-serif;
-  background-color: #fff8f0;
+  background-color: #fddcb0;
   color-scheme: light;
   font-size: 18px;
 }
@@ -14,8 +14,8 @@ html, body {
 @layer utilities {
   .card {
     background: #ffffff;
-    border: 2px solid #fed7aa;
-    box-shadow: 0 4px 24px rgba(249, 115, 22, 0.08);
+    border: 2px solid #fb923c;
+    box-shadow: 0 6px 32px rgba(234, 88, 12, 0.18);
   }
 
   .warm-gradient-text {
@@ -26,13 +26,13 @@ html, body {
   }
 
   .btn-orange {
-    background: linear-gradient(135deg, #f97316, #ea580c);
-    box-shadow: 0 6px 24px rgba(249, 115, 22, 0.35);
+    background: linear-gradient(135deg, #c2410c, #9a3412);
+    box-shadow: 0 6px 24px rgba(194, 65, 12, 0.4);
   }
 
   .btn-orange:hover {
-    background: linear-gradient(135deg, #ea580c, #c2410c);
-    box-shadow: 0 8px 28px rgba(234, 88, 12, 0.45);
+    background: linear-gradient(135deg, #9a3412, #7c2d12);
+    box-shadow: 0 8px 28px rgba(154, 52, 18, 0.5);
   }
 }
 
