@@ -26,10 +26,9 @@ const CHORD_RE = /^([A-G][#b]?)((?:maj|min|m(?!aj)|aug|dim|sus|add)?(?:2|4|5|6|7
 // 코드 줄에 등장할 수 있는 비코드 허용 토큰 (N.C. = No Chord)
 const NON_CHORD_TOKEN_RE = /^N\.?C\.?$/i;
 
-// 코드 줄 구분자: 공백·쉼표·바라인(|)·하이픈(-)
-// 하이픈: "G - Em - C - D" 또는 "Am-Dm-G-C" 형식 지원
-const SEPARATOR_RE = /[\s,|\-]+/;
-const SEPARATOR_CAPTURE_RE = /([\s,|\-]+)/;
+// 코드 줄 구분자: 공백·쉼표·마침표·바라인(|)·하이픈(-)
+const SEPARATOR_RE = /[\s,.|‐\-]+/;
+const SEPARATOR_CAPTURE_RE = /([\s,.|‐\-]+)/;
 
 function shiftNote(note: string, steps: number, useFlat: boolean): string {
   const idx = NOTE_INDEX[note];
