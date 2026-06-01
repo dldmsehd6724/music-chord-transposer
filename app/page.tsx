@@ -23,6 +23,7 @@ const translations = {
     sheetLabel: "악보 텍스트",
     placeholder: "코드를 입력하세요",
     guideText: "코드를 입력하세요.(코드 사이에 한 칸씩 띄우거나 `,` `.` `-`를 넣으시고 다음 코드를 적으세요)",
+    guideText2: "원본 키와 목표 키를 각각 클릭해서 선택하세요. (원본 키 = 지금 악보의 키, 목표 키 = 바꾸고 싶은 키)",
     transpose: "코드 바꾸기",
     transposing: "전조 중...",
     resultSection: "전조 결과",
@@ -48,6 +49,7 @@ const translations = {
     sheetLabel: "Chord Sheet",
     placeholder: "Enter your chords",
     guideText: "Enter your chords. (Separate each chord with a space, comma `,`, period `.`, or hyphen `-`, then type the next one.)",
+    guideText2: "Click to select the original key and the target key. (Original = your song's current key, Target = the key you want)",
     transpose: "Change Chords",
     transposing: "Transposing...",
     resultSection: "Transposed Result",
@@ -249,9 +251,12 @@ export default function Home() {
               className="overflow-hidden transition-all duration-500 ease-in-out"
               style={{ maxHeight: showGuide ? "500px" : "0px", opacity: showGuide ? 1 : 0 }}
             >
-              <div className="rounded-2xl bg-amber-50 border-2 border-amber-300 p-4 sm:p-5">
+              <div className="rounded-2xl bg-amber-50 border-2 border-amber-300 p-4 sm:p-5 space-y-2">
                 <p className="text-sm leading-relaxed text-stone-700">
                   <span className="mr-1">📌</span>{tx.guideText}
+                </p>
+                <p className="text-sm leading-relaxed text-stone-700">
+                  <span className="mr-1">📌</span>{tx.guideText2}
                 </p>
               </div>
             </div>
