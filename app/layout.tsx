@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "코드 전조기",
-  description: "악보의 코드를 원하는 키로 즉시 전조합니다",
+  title: "코디 (Chordy) · 코드체인지",
+  description: "코드 전조 도구 · Chord transposition tool — Chord Change",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
