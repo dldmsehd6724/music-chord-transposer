@@ -109,14 +109,21 @@ export default function Home() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [showCapo, setShowCapo] = useState(false);
+  const [showInputCapo, setShowInputCapo] = useState(false);
 
   const tx = translations[lang];
   const showGuide = chordText.trim() === "";
 
-  // 카포 후보 계산 (result·targetKey 바뀔 때만 재계산)
+  // 결과 기반 카포 후보 (전조 후, targetKey 기준)
   const capoRecs = useMemo(
     () => (result ? getCapoRecommendations(result, targetKey) : []),
     [result, targetKey]
+  );
+
+  // 입력 기반 카포 후보 (전조 없이, sourceKey 기준)
+  const inputCapoRecs = useMemo(
+    () => (chordText.trim() ? getCapoRecommendations(chordText, sourceKey) : []),
+    [chordText, sourceKey]
   );
 
   const handleTranspose = async () => {
@@ -290,6 +297,73 @@ export default function Home() {
                 )}
               </span>
             </button>
+
+            {/* ── 입력 코드 기반 카포 추천 (전조 없이 바로 사용 가능) ── */}
+            {chordText.trim() && (
+              <div>
+                <button
+                  onClick={() => setShowInputCapo(v => !v)}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-amber-50 border-2 border-amber-300 hover:bg-amber-100 transition-colors touch-manipulation active:scale-95"
+                >
+                  <span className="font-bold text-stone-800 text-base sm:text-lg">{tx.capoToggle}</span>
+                  <span className="text-stone-500 text-base">{showInputCapo ? "▲" : "▼"}</span>
+                </button>
+
+                <div
+                  className="overflow-hidden transition-all duration-400 ease-in-out"
+                  style={{ maxHeight: showInputCapo ? "900px" : "0px", opacity: showInputCapo ? 1 : 0 }}
+                >
+                  <div className="mt-4 space-y-3">
+                    {inputCapoRecs.length === 0 ? (
+                      <p className="text-base text-stone-600 px-1">{tx.capoNoRec}</p>
+                    ) : (
+                      inputCapoRecs.map((rec, i) => (
+                        <div
+                          key={rec.capo}
+                          className={`rounded-2xl border-2 p-4 sm:p-5 ${
+                            i === 0 ? "border-amber-400 bg-amber-50" : "border-stone-200 bg-stone-50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 flex-wrap mb-2">
+                            {i === 0 && (
+                              <span className="text-xs font-extrabold bg-amber-500 text-white px-2.5 py-0.5 rounded-full">
+                                {tx.capoBest}
+                              </span>
+                            )}
+                            <span className="font-extrabold text-stone-900 text-lg sm:text-xl">
+                              {lang === "ko" ? `카포 ${rec.capo}프렛` : `Capo ${rec.capo}`}
+                            </span>
+                            <span className="text-stone-500 text-sm">
+                              {lang === "ko" ? `(${rec.shapeRoot} 모양으로)` : `(${rec.shapeRoot} shape)`}
+                            </span>
+                          </div>
+                          <p className="text-sm sm:text-base text-stone-700 leading-relaxed mb-4">
+                            {lang === "ko"
+                              ? `카포를 ${rec.capo}프렛에 끼우고 아래 코드로 치면, 원곡과 같은 음높이(${sourceKey})로 더 쉽게 칠 수 있어요.`
+                              : `Put a capo on fret ${rec.capo} and play the chords below — it'll sound in ${sourceKey}, same as the original pitch.`}
+                          </p>
+                          <div>
+                            <p className="text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">
+                              {tx.capoFingerLabel}
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {rec.fingerChords.map(c => (
+                                <span
+                                  key={c}
+                                  className="px-3 py-1.5 bg-white border-2 border-blue-400 rounded-xl text-stone-900 font-mono font-bold text-base sm:text-lg"
+                                >
+                                  {c}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 결과 패널 */}
