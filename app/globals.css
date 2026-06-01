@@ -26,13 +26,13 @@ html, body {
   }
 
   .btn-orange {
-    background: linear-gradient(135deg, #c2410c, #9a3412);
-    box-shadow: 0 6px 24px rgba(194, 65, 12, 0.4);
+    background: linear-gradient(135deg, #7c2d12, #431407);
+    box-shadow: 0 6px 28px rgba(67, 20, 7, 0.55);
   }
 
   .btn-orange:hover {
-    background: linear-gradient(135deg, #9a3412, #7c2d12);
-    box-shadow: 0 8px 28px rgba(154, 52, 18, 0.5);
+    background: linear-gradient(135deg, #431407, #1c0a03);
+    box-shadow: 0 8px 32px rgba(67, 20, 7, 0.65);
   }
 }
 
