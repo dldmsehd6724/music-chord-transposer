@@ -19,9 +19,10 @@ const PREFER_FLAT = new Set([
 ]);
 
 // 코드 파싱 정규식
-// - 7sus4, 7sus2 지원 (sus 위치 추가)
-// - 다중 변화음 지원: b9#11 등 (?:[b#]\d+)* 로 확장
-const CHORD_RE = /^([A-G][#b]?)((?:maj|min|m(?!aj)|aug|dim|sus|add)?(?:2|4|5|6|7|9|11|13)?(?:sus[24])?(?:maj7|maj9)?(?:[b#]\d+)*)((?:\/[A-G][#b]?)?)$/;
+// - M7/Maj7/maj7/M9/Maj9 등 메이저 7th 표기 모두 지원
+// - 대문자 M = 메이저, 소문자 m = 마이너 구분
+// - M(?=7|9) : 뒤에 7 또는 9가 있을 때만 대문자 M을 접두어로 인식
+const CHORD_RE = /^([A-G][#b]?)((?:maj|Maj|M(?=7|9)|min|m(?!aj)|aug|dim|sus|add)?(?:2|4|5|6|7|9|11|13)?(?:sus[24])?(?:maj7|maj9|Maj7|Maj9)?(?:[b#]\d+)*)((?:\/[A-G][#b]?)?)$/;
 
 // 코드 줄에 등장할 수 있는 비코드 허용 토큰 (N.C. = No Chord)
 const NON_CHORD_TOKEN_RE = /^N\.?C\.?$/i;
@@ -120,36 +121,41 @@ export function formatResult(
 // ── 카포 추천 계산 ──────────────────────────────────────────────────────
 
 export interface CapoCandidate {
-  capo: number;       // 카포 프렛 (1–7)
-  shapeRoot: string;  // 손으로 잡을 모양의 루트 (C/D/E/G/A)
-  fingerChords: string[]; // 실제로 잡을 코드 목록
+  capo: number;
+  shapeRoot: string;
+  fingerChords: string[];
 }
 
-// CAGED 오픈 코드 포지션 — 카포 기준 키
-const EASY_SHAPE_ROOTS = [
+// 메이저 키: C 모양(idx=0)과 G 모양(idx=7)만 사용
+// capo = K mod 12 (C), capo = (K−7) mod 12 (G)
+const EASY_MAJOR_SHAPES = [
   { root: 'C', idx: 0 },
-  { root: 'D', idx: 2 },
-  { root: 'E', idx: 4 },
   { root: 'G', idx: 7 },
-  { root: 'A', idx: 9 },
+];
+
+// 마이너 키: Am 모양(idx=9)과 Em 모양(idx=4)만 사용
+// capo = (T−9) mod 12 (Am), capo = (T−4) mod 12 (Em)
+const EASY_MINOR_SHAPES = [
+  { root: 'Am', idx: 9 },
+  { root: 'Em', idx: 4 },
 ];
 
 /**
- * 전조 결과 텍스트와 목표 키를 분석해,
- * 카포를 N프렛에 끼우고 쉬운 모양으로 칠 수 있는 후보를
- * 최대 3개 (낮은 프렛 우선)로 반환한다.
+ * 전조 결과(또는 입력 코드) 텍스트와 목표 키를 분석해,
+ * 카포를 끼우고 쉬운 모양으로 칠 수 있는 후보를 최대 3개 반환.
  *
- * 계산식: capo = (targetIdx − shapeIdx) mod 12  (1 ≤ capo ≤ 7 인 것만)
+ * 메이저: C·G 모양만 / 마이너: Am·Em 모양만
+ * capo = (targetIdx − shapeIdx) mod 12, 유효 범위 1–7
  * 잡을 코드 = 결과 코드를 capo 반음만큼 아래로 전조
  */
 export function getCapoRecommendations(
   resultText: string,
   targetKey: string
 ): CapoCandidate[] {
+  const isMinorKey = targetKey.endsWith('m');
   const targetRoot = targetKey.replace(/m$/, '');
   const targetIdx = NOTE_INDEX[targetRoot] ?? 0;
 
-  // 결과 텍스트에서 고유 코드 추출 (헤더 줄은 자동 무시)
   const chordSet = new Set<string>();
   for (const line of resultText.split('\n')) {
     const brackets = line.match(/\[([A-G][#b]?[^\]]*)\]/g);
@@ -168,17 +174,17 @@ export function getCapoRecommendations(
   const uniqueChords = Array.from(chordSet);
   if (uniqueChords.length === 0) return [];
 
+  const shapeList = isMinorKey ? EASY_MINOR_SHAPES : EASY_MAJOR_SHAPES;
   const candidates: CapoCandidate[] = [];
 
-  for (const { root, idx: shapeIdx } of EASY_SHAPE_ROOTS) {
+  for (const { root, idx: shapeIdx } of shapeList) {
     const capo = ((targetIdx - shapeIdx) % 12 + 12) % 12;
     if (capo < 1 || capo > 7) continue;
 
-    // 결과 코드를 capo 반음 아래로 → 손으로 잡을 코드
     const seen = new Set<string>();
     const fingerChords: string[] = [];
     for (const c of uniqueChords) {
-      const f = shiftChord(c, -capo, false); // 샵 계열 표기
+      const f = shiftChord(c, -capo, false);
       if (!seen.has(f)) { seen.add(f); fingerChords.push(f); }
     }
 
