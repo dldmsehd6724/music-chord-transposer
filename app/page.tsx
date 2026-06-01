@@ -6,18 +6,9 @@ const MAJOR_KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", 
 const MINOR_KEYS = ["Am", "A#m", "Bm", "Cm", "C#m", "Dm", "D#m", "Em", "Fm", "F#m", "Gm", "G#m"];
 const ALL_KEYS = [...MAJOR_KEYS, ...MINOR_KEYS];
 
-const SAMPLE_CHORD = `[G]여기 서서 [Em]바라보면
-[C]온 세상이 [D]아름다워
-[G]하늘 아래 [Em]우리 함께
-[C]손을 잡고 [D]걸어가자
-
-[G]빛나는 저 [Em]별들처럼
-[C]우리의 꿈 [D]높이 날아
-[G]언제까지나 [Em]함께해요
-[C]이 순간을 [D]기억해요`;
 
 export default function Home() {
-  const [chordText, setChordText] = useState(SAMPLE_CHORD);
+  const [chordText, setChordText] = useState("");
   const [sourceKey, setSourceKey] = useState("G");
   const [targetKey, setTargetKey] = useState("C");
   const [result, setResult] = useState("");
