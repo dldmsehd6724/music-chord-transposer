@@ -110,7 +110,7 @@ export default function Home() {
         <div className="flex justify-end mb-4 sm:mb-6">
           <button
             onClick={() => setLang(lang === "ko" ? "en" : "ko")}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-orange-200 text-stone-600 text-sm font-semibold hover:bg-orange-50 hover:border-orange-300 transition-all duration-200 shadow-sm active:scale-95 touch-manipulation"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-orange-500 text-stone-900 text-sm font-bold hover:bg-orange-50 hover:border-orange-600 transition-all duration-200 shadow-sm active:scale-95 touch-manipulation"
           >
             <span>🌐</span>
             {tx.langToggle}
@@ -126,12 +126,12 @@ export default function Home() {
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight warm-gradient-text leading-none mb-2">
             {tx.appName}
           </h1>
-          <p className="text-xl sm:text-2xl font-semibold text-orange-300 tracking-widest mb-5">
+          <p className="text-xl sm:text-2xl font-semibold text-orange-600 tracking-widest mb-5">
             {tx.appNameSub}
           </p>
 
           <p className="text-lg sm:text-xl font-bold text-stone-700 mb-1">{tx.subtitle}</p>
-          <p className="text-sm sm:text-base text-stone-400">{tx.desc}</p>
+          <p className="text-sm sm:text-base text-stone-600">{tx.desc}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-7">
@@ -146,10 +146,10 @@ export default function Home() {
 
             {/* 키 선택 */}
             <div>
-              <p className="text-base font-bold text-stone-600 mb-3">{tx.keySection}</p>
+              <p className="text-base font-bold text-stone-800 mb-3">{tx.keySection}</p>
               <div className="flex items-center gap-3 sm:gap-4">
                 <div className="flex-1">
-                  <label htmlFor="sourceKey" className="block text-sm font-semibold text-stone-500 mb-2">
+                  <label htmlFor="sourceKey" className="block text-sm font-semibold text-stone-700 mb-2">
                     {tx.originalKey}
                   </label>
                   <select
@@ -167,7 +167,7 @@ export default function Home() {
                 </div>
 
                 <div className="flex-1">
-                  <label htmlFor="targetKey" className="block text-sm font-semibold text-stone-500 mb-2">
+                  <label htmlFor="targetKey" className="block text-sm font-semibold text-stone-700 mb-2">
                     {tx.targetKey}
                   </label>
                   <select
@@ -236,7 +236,7 @@ export default function Home() {
                   <div className="flex items-center gap-3 flex-wrap">
                     <div className="w-2 h-7 rounded-full bg-gradient-to-b from-emerald-400 to-teal-500" />
                     <h2 className="text-xl sm:text-2xl font-bold text-stone-800">{tx.resultSection}</h2>
-                    <span className="text-sm text-stone-500 font-mono bg-stone-100 px-2 py-0.5 rounded-lg">
+                    <span className="text-sm text-stone-700 font-mono bg-stone-200 px-2 py-0.5 rounded-lg">
                       {sourceKey} → {targetKey}
                     </span>
                   </div>
@@ -263,7 +263,7 @@ export default function Home() {
             {!isLoading && !result && !error && (
               <div className="hidden lg:flex card rounded-3xl p-12 text-center flex-1 flex-col items-center justify-center gap-4">
                 <div className="text-7xl opacity-60 animate-bounce" style={{ animationDuration: "3s" }}>🎶</div>
-                <p className="text-lg text-stone-500 leading-relaxed">
+                <p className="text-lg text-stone-700 leading-relaxed">
                   {tx.emptyLine1}<br />{tx.emptyLine2}
                 </p>
               </div>
@@ -271,14 +271,14 @@ export default function Home() {
 
             {!isLoading && !result && !error && (
               <div className="lg:hidden text-center py-3">
-                <p className="text-base text-stone-400">{tx.emptyMobile}</p>
+                <p className="text-base text-stone-600">{tx.emptyMobile}</p>
               </div>
             )}
           </div>
         </div>
 
         {/* 푸터 */}
-        <p className="mt-12 sm:mt-14 text-center text-sm sm:text-base text-stone-400">
+        <p className="mt-12 sm:mt-14 text-center text-sm sm:text-base text-stone-500">
           {tx.footer}
         </p>
       </div>
