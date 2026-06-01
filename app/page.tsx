@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { getCapoRecommendations } from "@/lib/chordTranspose";
 
 const MAJOR_KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const MINOR_KEYS = ["Am", "A#m", "Bm", "Cm", "C#m", "Dm", "D#m", "Em", "Fm", "F#m", "Gm", "G#m"];
@@ -33,6 +34,10 @@ const translations = {
     emptyLine2: "키를 선택한 후 코드 바꾸기를 눌러보세요",
     emptyMobile: "키를 선택한 후 위 버튼을 눌러보세요",
     footer: "순수 코드 전조 엔진 · Next.js",
+    capoToggle: "🎸 카포 추천",
+    capoBest: "⭐ 추천",
+    capoFingerLabel: "잡을 코드",
+    capoNoRec: "이미 쉬운 키예요! 카포 없이 그대로 치세요.",
   },
   en: {
     appName: "Chordy",
@@ -59,19 +64,21 @@ const translations = {
     emptyLine2: "select a key and press Change Chords.",
     emptyMobile: "Select a key and tap the button above.",
     footer: "Pure Chord Transposition Engine · Next.js",
+    capoToggle: "🎸 Capo Suggestions",
+    capoBest: "⭐ Best Pick",
+    capoFingerLabel: "Chords to finger",
+    capoNoRec: "Already an easy key! No capo needed.",
   },
 } as const;
 
 type Lang = keyof typeof translations;
 // ────────────────────────────────────────────────────────────────────────────
 
-// Web Audio API로 맑은 차임 소리 재생 (C-E-G 화음)
 function playChime() {
   try {
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
-
     const tone = (freq: number, vol: number) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -85,13 +92,10 @@ function playChime() {
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 1.3);
     };
-
-    tone(1046.5, 0.25); // C6
-    tone(1318.5, 0.15); // E6
-    tone(1568.0, 0.10); // G6
-  } catch (e) {
-    // Web Audio API 미지원 환경에서 무시
-  }
+    tone(1046.5, 0.25);
+    tone(1318.5, 0.15);
+    tone(1568.0, 0.10);
+  } catch (e) {}
 }
 
 export default function Home() {
@@ -104,15 +108,23 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [showCapo, setShowCapo] = useState(false);
 
   const tx = translations[lang];
   const showGuide = chordText.trim() === "";
+
+  // 카포 후보 계산 (result·targetKey 바뀔 때만 재계산)
+  const capoRecs = useMemo(
+    () => (result ? getCapoRecommendations(result, targetKey) : []),
+    [result, targetKey]
+  );
 
   const handleTranspose = async () => {
     if (!chordText.trim()) return;
     setIsLoading(true);
     setResult("");
     setError("");
+    setShowCapo(false);
     try {
       const res = await fetch("/api/transpose", {
         method: "POST",
@@ -148,9 +160,8 @@ export default function Home() {
 
       <div className="max-w-5xl mx-auto relative z-10 px-4 sm:px-6 py-8 sm:py-12 lg:py-14">
 
-        {/* 상단 버튼 영역 */}
+        {/* 상단 버튼 */}
         <div className="flex justify-end gap-2 mb-4 sm:mb-6">
-          {/* 음소거 토글 */}
           <button
             onClick={() => setIsMuted(!isMuted)}
             title={isMuted ? tx.soundOn : tx.soundOff}
@@ -158,7 +169,6 @@ export default function Home() {
           >
             {isMuted ? "🔇" : "🔊"}
           </button>
-          {/* 언어 전환 */}
           <button
             onClick={() => setLang(lang === "ko" ? "en" : "ko")}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-blue-500 text-stone-900 text-sm font-bold hover:bg-orange-50 hover:border-blue-500 transition-all duration-200 shadow-sm active:scale-95 touch-manipulation"
@@ -246,7 +256,7 @@ export default function Home() {
               />
             </div>
 
-            {/* 사용 안내 — 입력값이 없을 때만 표시, 부드럽게 사라짐 */}
+            {/* 사용 안내 — 입력값 없을 때만 표시 */}
             <div
               className="overflow-hidden transition-all duration-500 ease-in-out"
               style={{ maxHeight: showGuide ? "500px" : "0px", opacity: showGuide ? 1 : 0 }}
@@ -296,6 +306,7 @@ export default function Home() {
 
             {result && (
               <div className="card rounded-3xl p-6 sm:p-8 flex-1">
+                {/* 결과 헤더 */}
                 <div className="flex items-center justify-between mb-5 sm:mb-6 gap-3">
                   <div className="flex items-center gap-3 flex-wrap">
                     <div className="w-2 h-7 rounded-full bg-gradient-to-b from-emerald-400 to-teal-500" />
@@ -312,16 +323,88 @@ export default function Home() {
                         : "bg-orange-50 text-orange-700 border-blue-400 hover:bg-orange-100"
                     }`}
                   >
-                    {copied
-                      ? <><span>✓</span> {tx.copied}</>
-                      : <><span>📋</span> {tx.copy}</>
-                    }
+                    {copied ? <><span>✓</span> {tx.copied}</> : <><span>📋</span> {tx.copy}</>}
                   </button>
                 </div>
-                {/* 결과 텍스트 — 크게 */}
+
+                {/* 결과 텍스트 */}
                 <pre className="font-mono text-xl sm:text-2xl text-stone-900 whitespace-pre-wrap bg-orange-50 border-2 border-blue-400 rounded-2xl p-5 sm:p-6 overflow-auto max-h-96 sm:max-h-[30rem] leading-loose">
                   {result}
                 </pre>
+
+                {/* ── 카포 추천 섹션 ── */}
+                <div className="mt-5 pt-5 border-t-2 border-stone-100">
+                  <button
+                    onClick={() => setShowCapo(v => !v)}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-amber-50 border-2 border-amber-300 hover:bg-amber-100 transition-colors touch-manipulation active:scale-95"
+                  >
+                    <span className="font-bold text-stone-800 text-base sm:text-lg">{tx.capoToggle}</span>
+                    <span className="text-stone-500 text-base">{showCapo ? "▲" : "▼"}</span>
+                  </button>
+
+                  <div
+                    className="overflow-hidden transition-all duration-400 ease-in-out"
+                    style={{ maxHeight: showCapo ? "900px" : "0px", opacity: showCapo ? 1 : 0 }}
+                  >
+                    <div className="mt-4 space-y-3">
+                      {capoRecs.length === 0 ? (
+                        <p className="text-base text-stone-600 px-1">{tx.capoNoRec}</p>
+                      ) : (
+                        capoRecs.map((rec, i) => (
+                          <div
+                            key={rec.capo}
+                            className={`rounded-2xl border-2 p-4 sm:p-5 ${
+                              i === 0
+                                ? "border-amber-400 bg-amber-50"
+                                : "border-stone-200 bg-stone-50"
+                            }`}
+                          >
+                            {/* 제목 줄 */}
+                            <div className="flex items-center gap-2 flex-wrap mb-2">
+                              {i === 0 && (
+                                <span className="text-xs font-extrabold bg-amber-500 text-white px-2.5 py-0.5 rounded-full">
+                                  {tx.capoBest}
+                                </span>
+                              )}
+                              <span className="font-extrabold text-stone-900 text-lg sm:text-xl">
+                                {lang === "ko" ? `카포 ${rec.capo}프렛` : `Capo ${rec.capo}`}
+                              </span>
+                              <span className="text-stone-500 text-sm">
+                                {lang === "ko"
+                                  ? `(${rec.shapeRoot} 모양으로)`
+                                  : `(${rec.shapeRoot} shape)`}
+                              </span>
+                            </div>
+
+                            {/* 설명 */}
+                            <p className="text-sm sm:text-base text-stone-700 leading-relaxed mb-4">
+                              {lang === "ko"
+                                ? `카포를 ${rec.capo}프렛에 끼우고 아래 코드로 치면, 원곡과 같은 키(${targetKey})로 더 쉽게 칠 수 있어요.`
+                                : `Put a capo on fret ${rec.capo} and play the chords below — it'll sound in ${targetKey}, same as the original.`}
+                            </p>
+
+                            {/* 잡을 코드 */}
+                            <div>
+                              <p className="text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">
+                                {tx.capoFingerLabel}
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {rec.fingerChords.map(c => (
+                                  <span
+                                    key={c}
+                                    className="px-3 py-1.5 bg-white border-2 border-blue-400 rounded-xl text-stone-900 font-mono font-bold text-base sm:text-lg"
+                                  >
+                                    {c}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 

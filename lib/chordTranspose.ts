@@ -116,3 +116,74 @@ export function formatResult(
 ): string {
   return `=== 코드 전조 악보 ===\n원본 키: ${sourceKey}  →  전조 키: ${targetKey}\n=====================\n\n${text}`;
 }
+
+// ── 카포 추천 계산 ──────────────────────────────────────────────────────
+
+export interface CapoCandidate {
+  capo: number;       // 카포 프렛 (1–7)
+  shapeRoot: string;  // 손으로 잡을 모양의 루트 (C/D/E/G/A)
+  fingerChords: string[]; // 실제로 잡을 코드 목록
+}
+
+// CAGED 오픈 코드 포지션 — 카포 기준 키
+const EASY_SHAPE_ROOTS = [
+  { root: 'C', idx: 0 },
+  { root: 'D', idx: 2 },
+  { root: 'E', idx: 4 },
+  { root: 'G', idx: 7 },
+  { root: 'A', idx: 9 },
+];
+
+/**
+ * 전조 결과 텍스트와 목표 키를 분석해,
+ * 카포를 N프렛에 끼우고 쉬운 모양으로 칠 수 있는 후보를
+ * 최대 3개 (낮은 프렛 우선)로 반환한다.
+ *
+ * 계산식: capo = (targetIdx − shapeIdx) mod 12  (1 ≤ capo ≤ 7 인 것만)
+ * 잡을 코드 = 결과 코드를 capo 반음만큼 아래로 전조
+ */
+export function getCapoRecommendations(
+  resultText: string,
+  targetKey: string
+): CapoCandidate[] {
+  const targetRoot = targetKey.replace(/m$/, '');
+  const targetIdx = NOTE_INDEX[targetRoot] ?? 0;
+
+  // 결과 텍스트에서 고유 코드 추출 (헤더 줄은 자동 무시)
+  const chordSet = new Set<string>();
+  for (const line of resultText.split('\n')) {
+    const brackets = line.match(/\[([A-G][#b]?[^\]]*)\]/g);
+    if (brackets) {
+      brackets.forEach(b => {
+        const c = b.slice(1, -1).trim();
+        if (CHORD_RE.test(c)) chordSet.add(c);
+      });
+    } else if (isChordOnlyLine(line)) {
+      line.trim().split(SEPARATOR_RE).filter(Boolean).forEach(t => {
+        if (CHORD_RE.test(t)) chordSet.add(t);
+      });
+    }
+  }
+
+  const uniqueChords = Array.from(chordSet);
+  if (uniqueChords.length === 0) return [];
+
+  const candidates: CapoCandidate[] = [];
+
+  for (const { root, idx: shapeIdx } of EASY_SHAPE_ROOTS) {
+    const capo = ((targetIdx - shapeIdx) % 12 + 12) % 12;
+    if (capo < 1 || capo > 7) continue;
+
+    // 결과 코드를 capo 반음 아래로 → 손으로 잡을 코드
+    const seen = new Set<string>();
+    const fingerChords: string[] = [];
+    for (const c of uniqueChords) {
+      const f = shiftChord(c, -capo, false); // 샵 계열 표기
+      if (!seen.has(f)) { seen.add(f); fingerChords.push(f); }
+    }
+
+    candidates.push({ capo, shapeRoot: root, fingerChords });
+  }
+
+  return candidates.sort((a, b) => a.capo - b.capo).slice(0, 3);
+}
