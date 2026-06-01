@@ -252,10 +252,10 @@ export default function Home() {
               style={{ maxHeight: showGuide ? "500px" : "0px", opacity: showGuide ? 1 : 0 }}
             >
               <div className="rounded-2xl bg-amber-50 border-2 border-amber-300 p-4 sm:p-5 space-y-2">
-                <p className="text-sm leading-relaxed text-stone-900">
+                <p className="text-base leading-relaxed text-blue-950 font-semibold">
                   <span className="mr-1">📌</span>{tx.guideText}
                 </p>
-                <p className="text-sm leading-relaxed text-stone-900">
+                <p className="text-base leading-relaxed text-blue-950 font-semibold">
                   <span className="mr-1">📌</span>{tx.guideText2}
                 </p>
               </div>
